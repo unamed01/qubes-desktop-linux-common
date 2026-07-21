@@ -23,45 +23,46 @@ Usage:  $(basename "$0") [--disposable] [--user USER]
 
 Options:
   -h, --help        print this usage information
-  -d, --disposable  launch browser in current vm as disposable instead (will fallback to default_dispvm if currently focused vm isn't template_for_dispvms)
-  -u, --user        run browser as specified user 
+  -d, --disposable  launch file manager in current vm as disposable instead (will fallback to default_dispvm if currently focused vm isn't template_for_dispvms)
+  -u, --user        run file manager as specified user 
 USAGE
   return 0
 }
-domU_launch_browser() {
+domU_launch_terminal() {
   if [[ "$arg_user" != "DEFAULT" ]]; then
-    echo https:// | qrexec-client -d "$vm" "$arg_user:QUBESRPC qubes.OpenURL dom0"
+    qrexec-client -d "$vm" "$arg_user:qubes-open ."
   else
-    echo https:// | qrexec-client -d "$vm" 'DEFAULT:QUBESRPC qubes.OpenURL dom0'
+    qrexec-client -d "$vm" 'DEFAULT:qubes-open .'
   fi
 }
 
-disp_launch_browser() {
+disp_launch_terminal() {
   #if current vm cant be dispvm fallback to default dispvm
-  if [[ "$vm" != "dom0" && "$(qvm-prefs "$vm" template_for_dispvms 2>/dev/null)" != "True" ]]; then
+  if [[ "$(qvm-prefs "$vm" template_for_dispvms 2>/dev/null)" != "True" ]]; then
     dispvm="$(qubes-prefs default_dispvm)"
   else
     dispvm="$vm"
   fi
   if [[ "$arg_user" != "DEFAULT" ]]; then
-    echo https:// | qvm-run -u "$arg_user" -p --service --dispvm "$dispvm" qubes.OpenURL >/dev/null 2>&1 &
+    qvm-run -u "$arg_user" --dispvm "$dispvm" qubes-open . >/dev/null 2>&1 &
   else
-    echo https:// | qvm-run -p --service --dispvm "$dispvm" qubes.OpenURL >/dev/null 2>&1 &
+    qvm-run --dispvm "$dispvm" qubes-open . >/dev/null 2>&1 &
   fi
 }
 
 main() {
   vm="$(/usr/bin/qvm-xget-focus)"
   declare -g vm
-  if test -z "$vm" && [ "$arg_disposable" != "true" ]; then
-    echo dom0 doesn\'t have a browser
+  if test -z "$vm" && test "$arg_disposable" != "true"; then
+    #vm is dom0
+    xdg-open .
     exit 1
   fi
   if test "$arg_disposable" = "true"; then
-    disp_launch_browser
+    disp_launch_terminal
     exit $?
   fi
-  domU_launch_browser
+  domU_launch_terminal
 }
 
 # Adapted from https://stackoverflow.com/a/29754866
