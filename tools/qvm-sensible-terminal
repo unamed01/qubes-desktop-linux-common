@@ -34,21 +34,23 @@ USAGE
 
 #from https://github.com/i3/i3/blob/next/i3-sensible-terminal
 dom0_terminal() {
-  if [[ "$arg_user" = "DEFAULT" ]];then
-  for terminal in x-terminal-emulator xfce4-terminal xterm st mate-terminal gnome-terminal terminator urxvt rxvt termit Eterm aterm uxterm roxterm termite lxterminal terminology qterminal lilyterm tilix terminix konsole kitty guake tilda alacritty hyper wezterm rio ghostty; do
-    command -v "$terminal" &>/dev/null && exec "$terminal"
-  else 
-  for terminal in x-terminal-emulator xfce4-terminal xterm st mate-terminal gnome-terminal terminator urxvt rxvt termit Eterm aterm uxterm roxterm termite lxterminal terminology qterminal lilyterm tilix terminix konsole kitty guake tilda alacritty hyper wezterm rio ghostty; do
-    command -v "$terminal" &>/dev/null && exec sudo -u "$arg_user" "$terminal"
-  done
+  if [[ "$arg_user" = "DEFAULT" ]]; then
+    for terminal in x-terminal-emulator xfce4-terminal xterm st mate-terminal gnome-terminal terminator urxvt rxvt termit Eterm aterm uxterm roxterm termite lxterminal terminology qterminal lilyterm tilix terminix konsole kitty guake tilda alacritty hyper wezterm rio ghostty; do
+      command -v "$terminal" &>/dev/null && exec "$terminal"
+    done
+  else
+    for terminal in x-terminal-emulator xfce4-terminal xterm st mate-terminal gnome-terminal terminator urxvt rxvt termit Eterm aterm uxterm roxterm termite lxterminal terminology qterminal lilyterm tilix terminix konsole kitty guake tilda alacritty hyper wezterm rio ghostty; do
+      command -v "$terminal" &>/dev/null && exec sudo -u "$arg_user" "$terminal"
+    done
+  fi
 }
 
 main() {
   vm="$(/usr/bin/qvm-xget-focus)"
 
   if test -z "$vm"; then
-      dom0_terminal
-      exit $?
+    dom0_terminal
+    exit $?
   fi
 
   # Launch console for VM (hvc)
